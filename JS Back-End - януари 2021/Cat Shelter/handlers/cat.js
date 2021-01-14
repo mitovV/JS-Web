@@ -1,5 +1,6 @@
 const url = require('url');
 const fs = require('fs');
+const mv = require('mv');
 const path = require('path');
 const qs = require('querystring');
 const formidable = require('formidable');
@@ -36,7 +37,37 @@ module.exports = (req, res) => {
         let form = new formidable.IncomingForm();
 
         form.parse(req, (err, fields, files) => {
-           
+           if(err){
+               throw err;
+           }
+
+           let { name, description, breed } = fields;
+
+           let oldPath = files.upload.path;
+           let newPath =  path.normalize(path.join(__dirname, `../content/images/${files.upload.name}`))
+           mv(oldPath, newPath, (err) => {
+               if(err){
+                   throw err;
+               }
+
+               console.log('Successfully upload image');
+           })
+
+           fs.readFile('./data/cats.json', (err, data) => {
+               if(err){
+                   throw err;
+               }
+
+                let cats = JSON.parse(data);
+                console.log(cats.length + 1);
+                cats.push({id: cats.length + 1, name, description, breed, image: newPath});
+
+                let json = JSON.stringify(cats);
+                fs.writeFile('./data/cats.json', json, 'utf-8', () => console.log(`Successfully added cat ${name}`));
+           })
+
+           res.writeHead(302, {location: '/'});
+           res.end();
         })
 
     } else if(pathname === '/cats/add-breed' && req.method === 'GET'){
@@ -77,7 +108,7 @@ module.exports = (req, res) => {
 
                 let json = JSON.stringify(breeds);
 
-                fs.writeFile('./data/breeds.json', json, 'utf-8', () => console.log(`Successfully added breed ${breedObj.breed}`))
+                fs.writeFile('./data/breeds.json', json, 'utf-8', () => console.log(`Successfully added breed ${breedObj.breed}`));
             })
 
             res.writeHead(302, {location: '/'});
