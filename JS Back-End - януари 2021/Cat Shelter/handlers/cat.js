@@ -45,6 +45,34 @@ module.exports = (req, res) => {
             res.write(data);
             res.end();
         })
+    } else if(pathname === '/cats/add-breed' && req.method === 'POST'){
+        let formData = '';
+
+        req.on('data', (data) => {
+            formData += data;
+        })
+
+        req.on('end', () =>{
+            let breedObj = qs.parse(formData);
+
+            fs.readFile('./data/breeds.json', (err, data) => {
+                if(err){
+                    throw err;
+                }
+
+                let breeds = JSON.parse(data);
+                breeds.push(breedObj.breed);
+
+                let json = JSON.stringify(breeds);
+
+                fs.writeFile('./data/breeds.json', json, 'utf-8', () => console.log(`Successfully added breed ${breedObj.breed}`))
+            })
+
+            res.writeHead(302, {location: '/'});
+            res.end();
+        })
+
+
     } else{
         return true;
     }
