@@ -60,7 +60,7 @@ module.exports = (req, res) => {
 
                 let cats = JSON.parse(data);
                 console.log(cats.length + 1);
-                cats.push({id: cats.length + 1, name, description, breed, image: newPath});
+                cats.push({id: cats.length + 1, name, description, breed, image: files.upload.name});
 
                 let json = JSON.stringify(cats);
                 fs.writeFile('./data/cats.json', json, 'utf-8', () => console.log(`Successfully added cat ${name}`));
