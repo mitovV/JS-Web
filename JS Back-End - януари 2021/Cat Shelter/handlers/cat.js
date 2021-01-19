@@ -6,6 +6,7 @@ const qs = require('querystring');
 const formidable = require('formidable');
 const breeds = require('../data/breeds');
 const cats = require('../data/cats');
+const form = new formidable.IncomingForm();
 
 module.exports = (req, res) => {
     const pathname = url.parse(req.url).pathname;
@@ -34,8 +35,6 @@ module.exports = (req, res) => {
             res.end();
         })
     } else if(pathname === '/cats/add-cat' && req.method === 'POST'){
-        let form = new formidable.IncomingForm();
-
         form.parse(req, (err, fields, files) => {
            if(err){
                throw err;
@@ -154,8 +153,9 @@ module.exports = (req, res) => {
                  res.end();
             })
         })
-    } else if(pathname.includes('/cats-edit') && req.method === 'POST'){
-        let form = new formidable.IncomingForm();
+    } else if(pathname.includes('/cats-edit') && req.method === 'POST'){  
+        let urlParts = req.url.split('/');
+        let catId = +urlParts[urlParts.length -1];
 
         form.parse(req, (err, fields, files) => {
            if(err){
@@ -197,7 +197,72 @@ module.exports = (req, res) => {
            res.end();
         })
     } else if(pathname.includes('/cats-find-new-home') && req.method === 'GET'){
+        fs.readFile(`./views/catShelter.html`, (err, data) => {
+            if(err){
+                res.writeHead(404, {
+                    'Content-Type': 'text/plain'
+                })
+                res.write('Not found');
+                res.end();
+                console.log(err.message);
+                return;
+            }
 
+            res.writeHead(200, {
+                'Content-Type': 'text/html'
+            })
+
+            let urlParts = req.url.split('/');
+            let catId = +urlParts[urlParts.length -1];
+
+            let modifiedData = data.toString();
+            
+            fs.readFile('./data/cats.json', (err, catsData) => {
+                if(err){
+                    throw err;
+                }
+ 
+                 let cats = JSON.parse(catsData);
+                 cats.forEach(cat => {
+                     if(cat.id === catId){
+                      
+                        let catBreedPlaceholder = `<option value="${cat.breed}">${cat.breed}</option>`;
+                        modifiedData = modifiedData.replace('{{breed}}', catBreedPlaceholder);
+
+                        modifiedData = modifiedData.replace('{{name}}', cat.name);
+                        modifiedData = modifiedData.replace('{{description}}', cat.description);
+                        modifiedData = modifiedData.replace('{{id}}', catId);
+                        modifiedData = modifiedData.replace('{{image}}', '/content/images/' + cat.image);
+                    }
+                });
+                res.write(modifiedData);
+                res.end();
+            })
+        })
+    } else if(pathname.includes('/cats-find-new-home') && req.method === 'POST'){
+        let urlParts = req.url.split('/');
+        let catId = +urlParts[urlParts.length -1];
+
+        fs.readFile('./data/cats.json', (err, catsData) => {
+            if(err){
+                throw err;
+            }
+             let otherCats = [];
+             let cats = JSON.parse(catsData);
+             cats.forEach(cat => {
+                 if(cat.id !== catId){
+                  otherCats.push(cat);
+                }
+            });
+            cats = otherCats;
+
+            let json = JSON.stringify(otherCats);
+
+            fs.writeFile('./data/cats.json', json, 'utf-8', () => console.log(`Successfully sheltered cat.`));
+
+            res.writeHead(302, {location: '/'});
+            res.end();
+        })
     } else{
         return true;
     }
