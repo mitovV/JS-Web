@@ -263,7 +263,65 @@ module.exports = (req, res) => {
             res.writeHead(302, {location: '/'});
             res.end();
         })
-    } else{
+    } else if(pathname === '/search' && req.method === 'GET'){
+        let parsedUrl = url.parse(req.url);
+        let searchValueObj = qs.parse(parsedUrl.query);
+        let searchValue = searchValueObj.searchValue;
+
+        let filePath = path.normalize(
+            path.join(__dirname, '../views/home/index.html')
+        );
+
+        fs.readFile(filePath, (err, data) => {
+            if(err){
+                res.writeHead(404, {
+                    'Content-Type': 'text/plain'
+                })
+                res.write('Not found');
+                res.end();
+                console.log(err.message);
+                return;
+            }
+
+            res.writeHead(200, {
+                'Content-Type': 'text/html'
+            })
+
+            let dataPath = path.normalize(
+                path.join(__dirname, '../data/cats.json')
+            );
+            
+            fs.readFile(dataPath, (err, catsData) => {
+                if(err){
+                    throw err;
+                }
+
+                let result = [];
+                let cats = JSON.parse(catsData);
+                cats.forEach(cat => {
+                    if(cat.name.toLowerCase().includes(searchValue)){
+                        result.push(cat);
+                    }
+                })
+
+                let modifiedCats = result.map((cat) => `<li>
+                <img src="${path.join('/content/images/' + cat.image)}" alt="${cat.name}">
+                <h3>${cat.name}</h3>
+                <p><span>Breed: </span>${cat.breed}</p>
+                <p><span>Description: </span>${cat.description}</p>
+                <ul class="buttons">
+                    <li class="btn edit"><a href="/cats-edit/${cat.id}">Change Info</a></li>
+                    <li class="btn delete"><a href="/cats-find-new-home/${cat.id}">New Home</a></li>
+                </ul>
+                </li>`);
+
+                let modifiedData = data.toString().replace('{{cats}}', modifiedCats);
+                res.write(modifiedData);
+                res.end();
+            })
+        })
+       
+    } else {
         return true;
     }
 }
