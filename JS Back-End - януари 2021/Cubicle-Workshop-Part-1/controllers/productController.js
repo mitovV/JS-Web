@@ -4,7 +4,8 @@ const productService = require('../services/productService');
 
 
 router.get('/', (req, res) => {
-    res.render('index', {title: 'Home'});
+    let products = productService.getAll();
+    res.render('index', {title: 'Home', products});
 });
 
 router.get('/create', (req, res) => {
@@ -19,7 +20,9 @@ router.post('/create', (req, res) => {
 })
 
 router.get('/details/:productId', (req, res) => {
-    res.render('details', {title: 'Product Details'});
+    let cube = productService.getById(req.params.productId);
+    
+    res.render('details', {title: 'Product Details', cube});
 })
 
 module.exports = router;
