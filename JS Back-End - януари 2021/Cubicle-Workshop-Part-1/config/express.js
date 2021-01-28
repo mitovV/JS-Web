@@ -6,8 +6,11 @@ function setupExpress(app){
         extname: 'hbs'
     }));
     
-    app.use(express.static('public'));
     app.set('view engine', 'hbs');
+    app.use(express.static('public'));
+    app.use(express.urlencoded({
+        extended:true
+    }))
 }
 
 module.exports = setupExpress;
