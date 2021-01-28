@@ -1,16 +1,12 @@
 const express = require('express');
 const app = express();
 const config = require('./config/config');
-const handlebars = require('express-handlebars');
+const routes = require('./routes');
 
-app.engine('hbs', handlebars({
-    extname: 'nbs'
-}));
+require('./config/express')(app);
 
-app.set('view engine', 'hbs');
+app.use(routes);
 
-app.get('/', (req, res) => {
-    res.render('index', {layout: false});
-})
+
 
 app.listen(config.PORT, () => console.log(`Server is running on port ${config.PORT}...`));
