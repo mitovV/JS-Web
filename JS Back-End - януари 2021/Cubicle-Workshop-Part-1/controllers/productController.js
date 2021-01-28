@@ -1,7 +1,7 @@
 const { Router } = require('express');
-const { create } = require('express-handlebars');
-const { route } = require('./homeController');
 const router = Router();
+const productService = require('../services/productService');
+
 
 router.get('/', (req, res) => {
     res.render('index', {title: 'Home'});
@@ -12,7 +12,10 @@ router.get('/create', (req, res) => {
 });
 
 router.post('/create', (req, res) => {
-    console.log(req.body);
+ 
+    productService.create(req.body)
+        .then(() => res.redirect('/products'))
+        .catch(() => res.status(500).end());
 })
 
 router.get('/details/:productId', (req, res) => {
