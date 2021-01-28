@@ -4,21 +4,7 @@ const productService = require('../services/productService');
 
 
 router.get('/', (req, res) => {
-    let products = productService.getAll();
-
-    let { search, from, to } = req.query;
-    
-    if(search){
-        products = products.filter(x => x.name.toLowerCase().includes(search));
-    }
-
-    if(from){
-        products = products.filter(x => +x.level >= from )
-    }
-
-    if(to){
-        products = products.filter(x => +x.level <= to )
-    }
+    let products = productService.getAll(req.query);
 
     res.render('index', {title: 'Home', products});
 });
