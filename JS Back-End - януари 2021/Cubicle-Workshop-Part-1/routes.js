@@ -1,8 +1,14 @@
 const { Router } = require('express');
 const router = Router();
+const homeController = require('./controllers/homeController');
+const productController = require('./controllers/productController');
 
-router.get('/', (req, res) => {
-    res.render('index', {layout: false});
+
+router.use('/', homeController);
+router.use('/about', homeController);
+router.use('/create', productController);
+router.get('*', (req, res) => {
+    res.render('404', {title: 'Not Found'})
 })
 
 module.exports = router;

@@ -1,10 +1,9 @@
 const handlebars = require('express-handlebars');
 const express = require('express');
 
-
 function setupExpress(app){
     app.engine('hbs', handlebars({
-        extname: 'nbs'
+        extname: 'hbs'
     }));
     
     app.use(express.static('public'));
