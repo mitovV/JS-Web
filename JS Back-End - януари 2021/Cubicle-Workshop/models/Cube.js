@@ -8,7 +8,7 @@ const cubeShema = new mongoose.Schema({
     description: {
         type: String,
         required: true,
-        max: 100 
+        max: 100
     },
     imageUrl: {
         type: String,
@@ -26,7 +26,11 @@ const cubeShema = new mongoose.Schema({
             type: mongoose.Types.ObjectId,
             ref: 'Accessory',
         }
-    ] 
+    ],
+    creator: {
+        type: mongoose.Types.ObjectId,
+        ref: 'User'
+    }
 });
 
 module.exports = mongoose.model('Cube', cubeShema);
